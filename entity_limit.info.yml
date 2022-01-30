@@ -1,6 +1,6 @@
 name: 'Entity Limit'
-description: 'Allow administrators to restrict the number of entities that may be created based on different conditions.'
-package: 'Entity Limit'
 type: module
-core: 8.x
+description: 'Allow administrators to restrict the number of entities that may be created based on different conditions.'
+core_version_requirement: ^8 || ^9
+package: 'Entity Limit'
 configure: entity.entity_limit.collection

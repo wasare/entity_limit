@@ -35,8 +35,9 @@ class EntityLimitDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $label = $this->entity->label();
     $this->entity->delete();
-    drupal_set_message($this->t('The entity limit @label has been deleted.', array('@label' => $this->entity->name)));
+    \Drupal::messenger()->addStatus($this->t('The entity limit @label has been deleted.', array('@label' => $label)));
     $form_state->setRedirectUrl($this->getCancelUrl());
   }
 }

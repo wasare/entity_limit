@@ -3,7 +3,7 @@
 namespace Drupal\entity_limit;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Provide handler for all entity limit usage functions.
@@ -21,10 +21,10 @@ class EntityLimitUsage {
   /**
    * Construct entity_limit usage.
    *
-   * @param EntityManagerInterface $entityManager
+   * @param EntityTypeManagerInterface $entityManager
    *   Entity Manager.
    */
-  public function __construct(EntityManagerInterface $entityManager, PluginManagerInterface $violationManager) {
+  public function __construct(EntityTypeManagerInterface $entityManager, PluginManagerInterface $violationManager) {
     $this->entityManager = $entityManager;
     $this->violationStorage = $entityManager->getStorage('entity_limit');
     $this->violationManager = $violationManager;

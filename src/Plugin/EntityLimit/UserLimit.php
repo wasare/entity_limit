@@ -62,7 +62,7 @@ class UserLimit extends EntityLimitPluginBase implements ContainerFactoryPluginI
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['#tree'] = TRUE;
-    $entity_limit = $form['entity_limit'];
+    $entity_limit = $form['#entity_limit'];
     $limits = $entity_limit->get('limits');
     if (is_null($form_state->get('num_rows'))) {
       $count = !empty($limits) ? count($limits) : 1;

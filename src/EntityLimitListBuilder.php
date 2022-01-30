@@ -33,7 +33,7 @@ class EntityLimitListBuilder extends DraggableListBuilder {
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     return new static(
       $entity_type,
-      $container->get('entity.manager')->getStorage($entity_type->id()),
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
       $container->get('config.factory')
     );
   }
@@ -98,7 +98,7 @@ class EntityLimitListBuilder extends DraggableListBuilder {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-    drupal_set_message($this->t('The text format ordering has been saved.'));
+    \Drupal::messenger()->addStatus($this->t('The text format ordering has been saved.'));
   }
 
 }

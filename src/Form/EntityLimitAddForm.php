@@ -3,11 +3,13 @@
 namespace Drupal\entity_limit\Form;
 
 use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 
 /**
  * Configuration form for entity limit.
@@ -17,7 +19,7 @@ class EntityLimitAddForm extends EntityForm {
   /**
    * The entity manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityManager;
 
@@ -29,16 +31,32 @@ class EntityLimitAddForm extends EntityForm {
   protected $pluginManager;
 
   /**
+   * entity_type.bundle.info service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
+  protected $entityTypeBundleInfo;
+
+  /**
+   *  entity_type.repository service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeRepositoryInterface
+   */
+  protected $entityTypeRepository;
+
+  /**
    * Constructs the NodeTypeForm object.
    *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.
    * @param \Drupal\Component\Plugin\PluginManagerInterface $plugin_manager
    *   The Plugin Manager.
    */
-  public function __construct(EntityManagerInterface $entity_manager, PluginManagerInterface $plugin_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_manager, PluginManagerInterface $plugin_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityTypeRepositoryInterface $entity_type_repository) {
     $this->entityManager = $entity_manager;
     $this->pluginManager = $plugin_manager;
+    $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->entityTypeRepository = $entity_type_repository;
   }
 
   /**
@@ -46,8 +64,10 @@ class EntityLimitAddForm extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity.manager'),
-      $container->get('plugin.manager.entity_limit')
+      $container->get('entity_type.manager'),
+      $container->get('plugin.manager.entity_limit'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('entity_type.repository')
     );
   }
 
@@ -110,7 +130,7 @@ class EntityLimitAddForm extends EntityForm {
     $entity_type = $form_state->getValue('entity_type') ? $form_state->getValue('entity_type') : $entity_limit->getEntityLimitType();
     $options = array();
     if ($entity_type) {
-      $bundles = $this->entityManager->getBundleInfo($entity_type);
+      $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
       if (!empty($bundles)) {
         foreach ($bundles as $machine_name => $bundle) {
           $options[$machine_name] = $bundle['label'];
@@ -167,14 +187,14 @@ class EntityLimitAddForm extends EntityForm {
     $args = array('%label' => $entity_limit->label());
 
     if ($status == SAVED_UPDATED) {
-      drupal_set_message($this->t('The entity limit %label has been updated.', $args));
-      $form_state->setRedirectUrl($entity_limit->urlInfo('collection'));
+      \Drupal::messenger()->addStatus($this->t('The entity limit %label has been updated.', $args));
+      $form_state->setRedirectUrl($entity_limit->toUrl('collection'));
     }
     elseif ($status == SAVED_NEW) {
-      drupal_set_message($this->t('The entity limit %label has been added.', $args));
-      $context = array_merge($args, array('link' => $entity_limit->link($this->t('View'), 'collection')));
+      \Drupal::messenger()->addStatus($this->t('The entity limit %label has been added.', $args));
+      $context = array_merge($args, array('link' => $entity_limit->toLink($this->t('View'), 'collection')->toString()));
       $this->logger('node')->notice('Added entity limit %name.', $context);
-      $form_state->setRedirectUrl($entity_limit->urlInfo('manage-form'));
+      $form_state->setRedirectUrl($entity_limit->toUrl('manage-form'));
     }
   }
 
@@ -200,10 +220,11 @@ class EntityLimitAddForm extends EntityForm {
    *   Array of content entities.
    */
   protected function getContentEntities() {
-    $entity_manager = $this->entityManager->getEntityTypeLabels(TRUE);
-    $content_entities = array_values($entity_manager['Content']);
-    $content_entities_key = array_keys($entity_manager['Content']);
+    $entity_manager = $this->entityTypeRepository->getEntityTypeLabels(TRUE);
+    $content_entities = !empty($entity_manager[$this->t('Content')->render()]) ? array_values($entity_manager[$this->t('Content')->render()]) : array_values(reset($entity_manager));
+    $content_entities_key = !empty($entity_manager[$this->t('Content')->render()]) ? array_keys($entity_manager[$this->t('Content')->render()]) : array_keys(reset($entity_manager));
     $content_entities = array_combine($content_entities_key, $content_entities);
+
     return $content_entities;
   }
 

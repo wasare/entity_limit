@@ -32,6 +32,16 @@ use Drupal\entity_limit\EntityLimitInterface;
  *     "delete-form" = "/admin/structure/entity_limit/delete/{entity_limit}",
  *     "manage-form" = "/admin/structure/entity_limit/manage/{entity_limit}",
  *     "collection" = "/admin/structure/entity_limit"
+ *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "weight",
+ *     "plugin",
+ *     "entity_type",
+ *     "entity_bundles",
+ *     "limits",
+ *     "uuid"
  *   }
  * )
  */
