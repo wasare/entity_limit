@@ -1,0 +1,8 @@
+{
+    "name": "drupal/entity_limit",
+    "version": "8.x.2.0-alpha2",
+    "dist": {
+        "url": "https://github.com/wasare/entity_limit/archive/refs/tags/8.x.2.0-alpha2.zip",
+        "type": "zip"
+    }
+}
